@@ -19,6 +19,16 @@ const scene = new THREE.Scene()
 // Loaders
 const textureLoader = new THREE.TextureLoader()
 
+//textures
+const earthDayTexture = textureLoader.load('./earth/day.jpg')
+earthDayTexture.colorSpace = THREE.SRGBColorSpace
+
+const earthNightTexture = textureLoader.load('./earth/night.jpg')
+earthNightTexture.colorSpace = THREE.SRGBColorSpace
+
+const earthSpecularCloudsTexture = textureLoader.load('./earth/specularClouds.jpg')
+earthSpecularCloudsTexture.colorSpace - THREE.SRGBColorSpace
+
 /**
  * Earth
  */
@@ -29,10 +39,47 @@ const earthMaterial = new THREE.ShaderMaterial({
     fragmentShader: earthFragmentShader,
     uniforms:
     {
+        uDayTexture: new THREE.Uniform(earthDayTexture),
+        uNightTexture: new THREE.Uniform(earthNightTexture),
+        uSpecularCloudTexture: new THREE.Uniform(earthSpecularCloudsTexture),
+        uSunDirection: new THREE.Uniform( new THREE.Vector3())
     }
 })
 const earth = new THREE.Mesh(earthGeometry, earthMaterial)
 scene.add(earth)
+
+/**
+ * Sun
+ */
+//coordinates
+
+const debugSun = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(.1, 2),
+    new THREE.MeshBasicMaterial()
+
+)
+scene.add(debugSun)
+
+const sunSperical = new THREE.Spherical(1, Math.PI * .5, .5)
+const sunDirection = new THREE.Vector3()
+
+function updateSun(){
+    sunDirection.setFromSpherical(sunSperical)
+    debugSun.position.copy(sunDirection)
+        .multiplyScalar(5)
+    earthMaterial.uniforms.uSunDirection.value.copy(sunDirection)
+}
+updateSun()
+
+gui.add(sunSperical, 'phi')
+    .min(0)
+    .max( Math.PI)
+    .onChange(updateSun)
+gui.add(sunSperical, 'theta')
+    .min(-Math.PI)
+    .max( Math.PI)
+    .onChange(updateSun)
+
 
 /**
  * Sizes
@@ -58,7 +105,7 @@ window.addEventListener('resize', () =>
     renderer.setSize(sizes.width, sizes.height)
     renderer.setPixelRatio(sizes.pixelRatio)
 })
-
+ 
 /**
  * Camera
  */
