@@ -13,6 +13,9 @@ void main()
     vec3 normal = normalize(vNormal);
     vec3 color = vec3(0.0);
 
+    // Specular
+    vec2 specrularColor = texture(uSpecularCloudTexture, vUv).rg;
+
     // sun 
     // vec3 sunDirection = vec3(0., 0., 1.);
     float sunOrientation = dot(uSunDirection, normal);
@@ -21,8 +24,13 @@ void main()
     float dayMix = smoothstep( -.25, .5, sunOrientation);
     vec3 dayColor = texture(uDayTexture, vUv).rgb;
     vec3 nightColor = texture(uNightTexture, vUv).rgb;
-    vec3 specrularColor = texture(uSpecularCloudTexture, vUv).rgb;
     color = mix( nightColor, dayColor, dayMix);
+
+    // Cloud
+    float cloudMix = smoothstep(.5, 1., specrularColor.g);
+    cloudMix *= dayMix;
+
+    color = mix(color, vec3(1.), cloudMix);
 
     // color += dayColor;
     // color += specrularColor;
