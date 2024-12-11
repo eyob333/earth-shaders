@@ -6,6 +6,8 @@ uniform sampler2D uDayTexture;
 uniform sampler2D uNightTexture;
 uniform sampler2D uSpecularCloudTexture;
 uniform vec3 uSunDirection;
+uniform vec3 uAtmosphereTwilightColor;
+uniform vec3 uAtmosphereDayColor;
 
 void main()
 {
@@ -29,8 +31,18 @@ void main()
     // Cloud
     float cloudMix = smoothstep(.5, 1., specrularColor.g);
     cloudMix *= dayMix;
-
     color = mix(color, vec3(1.), cloudMix);
+
+    //Fresnel 
+    float fresnel = dot( viewDirection, normal) + 1.;
+    fresnel = pow(fresnel, 2.);
+
+    // Atmosphere
+    float atmospherDayMix = smoothstep( -.5, 1., sunOrientation);
+    vec3 atmosphereColorMix = mix( uAtmosphereTwilightColor, uAtmosphereDayColor, atmospherDayMix);
+    color = mix(color, atmosphereColorMix, fresnel * atmospherDayMix);
+
+
 
     // color += dayColor;
     // color += specrularColor;
