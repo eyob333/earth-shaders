@@ -3,6 +3,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import GUI from 'lil-gui'
 import earthVertexShader from './shaders/earth/vertex.glsl?raw'
 import earthFragmentShader from './shaders/earth/fragment.glsl?raw'
+import atmosphereVertexShader from './shaders/atmosphere/vertex.glsl?raw'
+import atmosphereFragmentShader from './shaders/atmosphere/fragment.glsl?raw'
+
 
 /**
  * Base
@@ -60,6 +63,23 @@ const earthMaterial = new THREE.ShaderMaterial({
 const earth = new THREE.Mesh(earthGeometry, earthMaterial)
 scene.add(earth)
 
+//Atmosphere
+const atmosphereMaterial = new THREE.ShaderMaterial({
+    vertexShader: atmosphereVertexShader,
+    fragmentShader: atmosphereFragmentShader,
+    uniforms: {
+        uSunDirection: new THREE.Uniform( new THREE.Vector3()),
+        uAtmosphereDayColor: new THREE.Uniform(new THREE.Color( earthPrameters.atmosphereDayColor)),
+        uAtmosphereTwilightColor: new THREE.Uniform(new THREE.Color( earthPrameters.atmosphereTwilightColor))
+    },  
+    side: THREE.BackSide,
+    transparent: true
+})
+const atmosphere = new THREE.Mesh(earthGeometry,atmosphereMaterial)
+atmosphere.scale.set(1.04, 1.04, 1.04)
+scene.add(atmosphere)
+
+
 /**
  * Sun
  */
@@ -80,6 +100,7 @@ function updateSun(){
     debugSun.position.copy(sunDirection)
         .multiplyScalar(5)
     earthMaterial.uniforms.uSunDirection.value.copy(sunDirection)
+    atmosphereMaterial.uniforms.uSunDirection.value.copy(sunDirection)
 }
 updateSun()
 
@@ -94,10 +115,12 @@ gui.add(sunSperical, 'theta')
 
 gui.addColor(earthPrameters, 'atmosphereDayColor').onChange( ()=> {
     earthMaterial.uniforms.uAtmosphereDayColor.value.set(earthPrameters.atmosphereDayColor)
+    atmosphereMaterial.uniforms.uAtmosphereDayColor.value.set(earthPrameters.atmosphereDayColor)
 })
 
 gui.addColor(earthPrameters, 'atmosphereTwilightColor').onChange( ()=> {
     earthMaterial.uniforms.uAtmosphereDayColor.value.set(earthPrameters.atmosphereTwilightColor)
+    atmosphereMaterial.uniforms.uAtmosphereDayColor.value.set(earthPrameters.atmosphereTwilightColor)
 })
 
 /**
