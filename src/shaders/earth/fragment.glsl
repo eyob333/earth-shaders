@@ -15,8 +15,8 @@ void main()
     vec3 normal = normalize(vNormal);
     vec3 color = vec3(0.0);
 
-    // Specular
-    vec2 specrularColor = texture(uSpecularCloudTexture, vUv).rg;
+    // Specular texrue
+    vec2 specrularCloudColor = texture(uSpecularCloudTexture, vUv).rg;
 
     // sun 
     // vec3 sunDirection = vec3(0., 0., 1.);
@@ -29,7 +29,7 @@ void main()
     color = mix( nightColor, dayColor, dayMix);
 
     // Cloud
-    float cloudMix = smoothstep(.5, 1., specrularColor.g);
+    float cloudMix = smoothstep(.5, 1., specrularCloudColor.g);
     cloudMix *= dayMix;
     color = mix(color, vec3(1.), cloudMix);
 
@@ -41,6 +41,15 @@ void main()
     float atmospherDayMix = smoothstep( -.5, 1., sunOrientation);
     vec3 atmosphereColorMix = mix( uAtmosphereTwilightColor, uAtmosphereDayColor, atmospherDayMix);
     color = mix(color, atmosphereColorMix, fresnel * atmospherDayMix);
+
+    // Specular 
+    vec3 reflection = reflect(-uSunDirection, normal);
+    float specular = - dot(reflection, viewDirection);
+    vec3 specularColor = mix(vec3(1.), atmosphereColorMix, fresnel);
+    specular = max(specular, .0);
+    specular = pow(specular, 32.);
+    specular *= specrularCloudColor.r;
+    color += specular * specularColor;
 
 
 
